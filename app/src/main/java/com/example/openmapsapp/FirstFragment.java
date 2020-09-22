@@ -16,12 +16,17 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
+
+import com.example.openmapsapp.data.Feature;
+import com.example.openmapsapp.data.Geometry;
+import com.example.openmapsapp.data.Place;
 
 import org.osmdroid.api.IMapController;
 import org.osmdroid.config.Configuration;
@@ -37,16 +42,22 @@ import org.osmdroid.views.overlay.infowindow.MarkerInfoWindow;
 
 import java.util.ArrayList;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 import static android.content.Context.LOCATION_SERVICE;
 
 public class FirstFragment extends Fragment {
 
     private MapView mapView;
+    private TextView textView;
     private final String TAG = "Map";
     private final int REQUEST_PERMISSIONS_REQUEST_CODE = 1;
     private final String KEY_BOX = "BOX";
     private BoundingBox boundingBox;
     private LocationManager locationManager;
+    ArrayList<Place> places;
 
     @Override
     public View onCreateView(
@@ -63,6 +74,7 @@ public class FirstFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         Configuration.getInstance().load(getContext(), PreferenceManager.getDefaultSharedPreferences(getContext()));
         mapView = view.findViewById(R.id.map_view);
+        textView = view.findViewById(R.id.text1);
         mapView.setTileSource(TileSourceFactory.DEFAULT_TILE_SOURCE);
         mapView.setMultiTouchControls(true);
         requestPermissionsIfNecessary(new String[] {
@@ -75,6 +87,31 @@ public class FirstFragment extends Fragment {
         });
         IMapController mapController = mapView.getController();
         mapController.setZoom(18.0);
+        final String[] s = {""};
+        MapService.getInstance().getMapAPI().search("54, улица Стройкова, Сысоево, Железнодорожный район, Рязань, Рязанская область, Центральный федеральный округ, 390026, Россия").enqueue(new Callback<ArrayList<Place>>() {
+            @Override
+            public void onResponse(Call<ArrayList<Place>> call, Response<ArrayList<Place>> response) {
+                places = response.body();
+                for (Place place: places) {
+                    for (Feature feature : place.getFeatures()) {
+                        Geometry geometry = feature.getGeometry();
+                        for(double v :geometry.getCoordinates()){
+                            Log.e("MAPTEST",feature.getType()+" "+v+" ");
+                            s[0] +=feature.getType()+" "+v+" ";
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ArrayList<Place>> call, Throwable t) {
+
+            }
+        });
+
+        //textView.setText(s[0]);
+        Log.e("MAPTEST", s[0]);
+
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000 * 10, 10, locationListener);
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,1000*10,10, locationListener);
         Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
