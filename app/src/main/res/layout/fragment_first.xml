@@ -6,18 +6,15 @@
     android:layout_height="match_parent"
     tools:context=".FirstFragment">
 
-   <TextView
-       android:text="test"
-       android:textSize="24dp"
-       android:layout_alignParentBottom="true"
-       android:layout_margin="20dp"
-       android:id="@+id/text1"
-       android:layout_width="match_parent"
-       android:layout_height="wrap_content"/>
    <org.osmdroid.views.MapView
        android:id="@+id/map_view"
        android:layout_width="match_parent"
-       android:layout_height="600dp"
-       android:elevation="1dp" />
+       android:layout_height="match_parent"
+       android:elevation="1dp"
+       android:animationCache="true"/>
 
+   <Button
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:id="@+id/my_position"/>
 </RelativeLayout>

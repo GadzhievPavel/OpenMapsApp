@@ -34,6 +34,7 @@ import org.osmdroid.tileprovider.tilesource.ITileSource;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.BoundingBox;
 import org.osmdroid.util.GeoPoint;
+import org.osmdroid.views.CustomZoomButtonsController;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.OverlayManager;
@@ -41,6 +42,7 @@ import org.osmdroid.views.overlay.infowindow.InfoWindow;
 import org.osmdroid.views.overlay.infowindow.MarkerInfoWindow;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -51,14 +53,15 @@ import static android.content.Context.LOCATION_SERVICE;
 public class FirstFragment extends Fragment {
 
     private MapView mapView;
-    private TextView textView;
     private final String TAG = "Map";
     private final int REQUEST_PERMISSIONS_REQUEST_CODE = 1;
     private final String KEY_BOX = "BOX";
     private BoundingBox boundingBox;
     private LocationManager locationManager;
-    ArrayList<Place> places;
-
+    Place places;
+    private IMapController mapController;
+    private GeoPoint point;
+    private Marker marker;
     @Override
     public View onCreateView(
             LayoutInflater inflater, ViewGroup container,
@@ -74,50 +77,45 @@ public class FirstFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         Configuration.getInstance().load(getContext(), PreferenceManager.getDefaultSharedPreferences(getContext()));
         mapView = view.findViewById(R.id.map_view);
-        textView = view.findViewById(R.id.text1);
+        view.findViewById(R.id.bubble_image);
         mapView.setTileSource(TileSourceFactory.DEFAULT_TILE_SOURCE);
         mapView.setMultiTouchControls(true);
+        mapView.getZoomController().setVisibility(CustomZoomButtonsController.Visibility.NEVER);
+        mapView.setTilesScaledToDpi(true);
+        mapView.setMinZoomLevel(4.0);
+        mapView.setMaxZoomLevel(19.0);
         requestPermissionsIfNecessary(new String[] {
-                // if you need to show the current location, uncomment the line below
-                // Manifest.permission.ACCESS_FINE_LOCATION,
-                // WRITE_EXTERNAL_STORAGE is required in order to show the map
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
                 Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION
         });
-        IMapController mapController = mapView.getController();
+        mapController = mapView.getController();
         mapController.setZoom(18.0);
-        final String[] s = {""};
-        MapService.getInstance().getMapAPI().search("54, улица Стройкова, Сысоево, Железнодорожный район, Рязань, Рязанская область, Центральный федеральный округ, 390026, Россия").enqueue(new Callback<ArrayList<Place>>() {
+        MapService.getInstance().getMapAPI().search("54, улица Стройкова, Сысоево, Железнодорожный район, Рязань, Рязанская область, Центральный федеральный округ, 390026, Россия").enqueue(new Callback<Place>() {
             @Override
-            public void onResponse(Call<ArrayList<Place>> call, Response<ArrayList<Place>> response) {
+            public void onResponse(Call<Place> call, Response<Place> response) {
                 places = response.body();
-                for (Place place: places) {
-                    for (Feature feature : place.getFeatures()) {
-                        Geometry geometry = feature.getGeometry();
-                        for(double v :geometry.getCoordinates()){
-                            Log.e("MAPTEST",feature.getType()+" "+v+" ");
-                            s[0] +=feature.getType()+" "+v+" ";
-                        }
-                    }
+                for (Feature feature : places.getFeatures()) {
+                    Geometry geometry = feature.getGeometry();
+                    point = new GeoPoint(geometry.getCoordinates().get(1).doubleValue(),geometry.getCoordinates().get(0).doubleValue());
+                    mapController.setCenter(point);
+                    marker.setPosition(point);
+                    marker.setTitle("Это здесь");
+                    mapView.getOverlays().add(marker);
                 }
             }
-
             @Override
-            public void onFailure(Call<ArrayList<Place>> call, Throwable t) {
-
+            public void onFailure(Call<Place> call, Throwable t) {
+                Log.e("MAPTEST",t.getMessage());
             }
         });
-
-        //textView.setText(s[0]);
-        Log.e("MAPTEST", s[0]);
 
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000 * 10, 10, locationListener);
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,1000*10,10, locationListener);
         Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-        GeoPoint point = new GeoPoint(54.9610646, 41.7551758);
+        point = new GeoPoint(54.9610646, 41.7551758);
         mapController.setCenter(point);
-        Marker marker = new Marker(mapView);
+        marker = new Marker(mapView);
         marker.setPosition(point);
         marker.setTitle("Вы тут");
         mapView.getOverlays().add(marker);
