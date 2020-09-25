@@ -62,8 +62,6 @@ public class FirstFragment extends Fragment implements View.OnClickListener {
         Configuration.getInstance().load(getContext(), PreferenceManager.getDefaultSharedPreferences(getContext()));
         mapView = view.findViewById(R.id.map_view);
         setupMap();
-        myLocation = view.findViewById(R.id.my_position);
-        myLocation.setOnClickListener(this);
         requestPermissionsIfNecessary(new String[] {Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION});
         findBestPosition();
 //        MapService.getInstance().getMapAPI().search("54, улица Стройкова, Сысоево, Железнодорожный район, Рязань, Рязанская область, Центральный федеральный округ, 390026, Россия").enqueue(new Callback<Place>() {
@@ -85,6 +83,7 @@ public class FirstFragment extends Fragment implements View.OnClickListener {
 //            }
 //        });
 
+        getActivity().findViewById(R.id.my_position).setOnClickListener(this);
 
     }
 
