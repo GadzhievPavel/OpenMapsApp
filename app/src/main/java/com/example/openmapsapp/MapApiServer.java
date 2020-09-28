@@ -11,7 +11,7 @@ import retrofit2.http.Query;
 
 public interface MapApiServer {
 
-    @GET("search?format=geocodejson")
+    @GET("search?format=geocodejson&accept-language=ru")
     Call<Place> search(@Query("q") String query);
 
 }

@@ -9,16 +9,23 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageButton;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+
+import com.example.openmapsapp.data.Feature;
+import com.example.openmapsapp.data.Geometry;
 import com.example.openmapsapp.data.Place;
 
 import org.osmdroid.api.IMapController;
@@ -29,13 +36,19 @@ import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.CustomZoomButtonsController;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Marker;
+import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
+import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
 import java.security.Provider;
 import java.util.ArrayList;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 import static android.content.Context.LOCATION_SERVICE;
 
-public class FirstFragment extends Fragment implements View.OnClickListener {
+public class FirstFragment extends Fragment implements View.OnClickListener, View.OnKeyListener {
 
     private MapView mapView;
     private final String TAG = "Map";
@@ -46,6 +59,10 @@ public class FirstFragment extends Fragment implements View.OnClickListener {
     Place places;
     private IMapController mapController;
     private ImageButton myLocation;
+    private GeoPoint point;
+    private GeoPoint myGeoPoint;
+    private MyLocationNewOverlay myLocationNewOverlay;
+    private EditText editText;
     @Override
     public View onCreateView(
             LayoutInflater inflater, ViewGroup container,
@@ -62,28 +79,17 @@ public class FirstFragment extends Fragment implements View.OnClickListener {
         Configuration.getInstance().load(getContext(), PreferenceManager.getDefaultSharedPreferences(getContext()));
         mapView = view.findViewById(R.id.map_view);
         setupMap();
+        myLocationNewOverlay = new MyLocationNewOverlay(new GpsMyLocationProvider(getContext()),mapView);
+        myLocationNewOverlay.enableMyLocation();
+        myLocationNewOverlay.enableFollowLocation();
+        mapView.getOverlays().add(myLocationNewOverlay);
+        myGeoPoint = myLocationNewOverlay.getMyLocation();
+        mapController.setCenter(myGeoPoint);
         requestPermissionsIfNecessary(new String[] {Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION});
-        findBestPosition();
-//        MapService.getInstance().getMapAPI().search("54, улица Стройкова, Сысоево, Железнодорожный район, Рязань, Рязанская область, Центральный федеральный округ, 390026, Россия").enqueue(new Callback<Place>() {
-//            @Override
-//            public void onResponse(Call<Place> call, Response<Place> response) {
-//                places = response.body();
-//                for (Feature feature : places.getFeatures()) {
-//                    Geometry geometry = feature.getGeometry();
-//                    point = new GeoPoint(geometry.getCoordinates().get(1).doubleValue(),geometry.getCoordinates().get(0).doubleValue());
-//                    mapController.setCenter(point);
-//                    marker.setPosition(point);
-//                    marker.setTitle("Это здесь");
-//                    mapView.getOverlays().add(marker);
-//                }
-//            }
-//            @Override
-//            public void onFailure(Call<Place> call, Throwable t) {
-//                Log.e("MAPTEST",t.getMessage());
-//            }
-//        });
 
         getActivity().findViewById(R.id.my_position).setOnClickListener(this);
+        editText = getActivity().findViewById(R.id.address);
+        getActivity().findViewById(R.id.search).setOnClickListener(this);
 
     }
 
@@ -162,8 +168,38 @@ public class FirstFragment extends Fragment implements View.OnClickListener {
     public void onClick(View view) {
         switch (view.getId()){
             case R.id.my_position:
-                findBestPosition();
+                myGeoPoint = myLocationNewOverlay.getMyLocation();
+                mapController.setCenter(myGeoPoint);
+                break;
+            case R.id.search:
+                MapService.getInstance().getMapAPI().search(editText.getText().toString()).enqueue(new Callback<Place>() {
+                    @Override
+                    public void onResponse(Call<Place> call, Response<Place> response) {
+                        places = response.body();
+                        for (Feature feature :places.getFeatures()) {
+                            Geometry geometry = feature.getGeometry();
+                            point = new GeoPoint(geometry.getCoordinates().get(1).doubleValue(),geometry.getCoordinates().get(0).doubleValue());
+                            mapController.setCenter(point);
+                            Marker marker = new Marker(mapView);
+                            marker.setPosition(point);
+                            marker.setTitle("Это здесь");
+                            mapView.getOverlays().add(marker);
+
+                        }
+                    }
+                    @Override
+                    public void onFailure(Call<Place> call, Throwable t) {
+                        Log.e("MAPTEST",t.getMessage());
+                    }
+                });
                 break;
         }
+    }
+
+    @Override
+    public boolean onKey(View view, int i, KeyEvent keyEvent) {
+        String s = editText.getText().toString();
+
+        return false;
     }
 }

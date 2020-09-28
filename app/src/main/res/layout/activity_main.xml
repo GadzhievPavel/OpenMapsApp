@@ -17,4 +17,31 @@
         android:layout_alignParentRight="true"
         android:layout_margin="20dp"
         app:srcCompat="@drawable/ic_menu_mylocation" />
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <EditText
+            android:layout_alignLeft="@id/search"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:id="@+id/address"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:layout_marginLeft="20dp"
+            android:lines="1"
+            android:hint="адрес"/>
+        <ImageButton
+            android:layout_centerInParent="true"
+            android:background="@android:color/transparent"
+            android:layout_marginRight="20dp"
+            android:layout_marginTop="20dp"
+            android:layout_alignParentRight="true"
+            android:id="@+id/search"
+            android:src="@drawable/ic_action_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+    </RelativeLayout>
+
 </RelativeLayout>
