@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.yandex.mapkit.mapview.MapView
+        android:id="@+id/yandex_maps"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:layout_marginTop="20dp"
+            android:layout_marginLeft="20dp"
+            android:id="@+id/edit_query_yandex"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@id/search_button_yandex"/>
+        <ImageButton
+            android:layout_margin="10dp"
+            android:layout_centerInParent="true"
+            android:layout_alignParentRight="true"
+            android:scaleY="1.5"
+            android:scaleX="1.5"
+            android:id="@+id/search_button_yandex"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_action_name"
+            android:background="@android:color/transparent"/>
+
+    </RelativeLayout>
+
+
+
+    <ImageButton
+        android:background="@drawable/ic_menu_mylocation"
+        android:id="@+id/my_position_yandex"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="20dp"
+        android:layout_marginBottom="40dp"/>
+
+</RelativeLayout>

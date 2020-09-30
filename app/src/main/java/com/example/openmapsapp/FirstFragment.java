@@ -64,10 +64,7 @@ public class FirstFragment extends Fragment implements View.OnClickListener, Vie
     private MyLocationNewOverlay myLocationNewOverlay;
     private EditText editText;
     @Override
-    public View onCreateView(
-            LayoutInflater inflater, ViewGroup container,
-            Bundle savedInstanceState
-    ) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         locationManager = (LocationManager) getContext().getSystemService(LOCATION_SERVICE);
         return inflater.inflate(R.layout.fragment_first, container, false);
@@ -199,7 +196,6 @@ public class FirstFragment extends Fragment implements View.OnClickListener, Vie
     @Override
     public boolean onKey(View view, int i, KeyEvent keyEvent) {
         String s = editText.getText().toString();
-
         return false;
     }
 }
