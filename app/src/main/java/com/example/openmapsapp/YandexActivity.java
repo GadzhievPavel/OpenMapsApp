@@ -13,16 +13,24 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.yandex.mapkit.Animation;
+import com.yandex.mapkit.GeoObject;
 import com.yandex.mapkit.GeoObjectCollection;
+import com.yandex.mapkit.GeoObjectSession;
 import com.yandex.mapkit.MapKit;
 import com.yandex.mapkit.MapKitFactory;
 import com.yandex.mapkit.geometry.Point;
+import com.yandex.mapkit.layers.GeoObjectTapEvent;
+import com.yandex.mapkit.layers.GeoObjectTapListener;
 import com.yandex.mapkit.layers.ObjectEvent;
 import com.yandex.mapkit.location.Location;
 import com.yandex.mapkit.location.LocationListener;
 import com.yandex.mapkit.location.LocationManager;
 import com.yandex.mapkit.location.LocationStatus;
+import com.yandex.mapkit.map.CameraListener;
 import com.yandex.mapkit.map.CameraPosition;
+import com.yandex.mapkit.map.CameraUpdateReason;
+import com.yandex.mapkit.map.GeoObjectSelectionMetadata;
+import com.yandex.mapkit.map.Map;
 import com.yandex.mapkit.map.MapObjectCollection;
 import com.yandex.mapkit.map.VisibleRegionUtils;
 import com.yandex.mapkit.mapview.MapView;
@@ -38,7 +46,7 @@ import com.yandex.mapkit.user_location.UserLocationView;
 import com.yandex.runtime.Error;
 import com.yandex.runtime.image.ImageProvider;
 
-public class YandexActivity extends AppCompatActivity implements UserLocationObjectListener, View.OnClickListener, Session.SearchListener {
+public class YandexActivity extends AppCompatActivity implements CameraListener, UserLocationObjectListener, View.OnClickListener, Session.SearchListener {
 
     private final String MAPKIT_API_KEY = "c1afc545-5c1e-48f2-99af-210cd8c7c768";
     private MapView mapView;
@@ -74,12 +82,14 @@ public class YandexActivity extends AppCompatActivity implements UserLocationObj
         setContentView(R.layout.activity_yandex_map);
         mapView = findViewById(R.id.yandex_maps);
         imageButton = findViewById(R.id.my_position_yandex);
-        searchButton = findViewById(R.id.search_button_yandex);
         editText = findViewById(R.id.edit_query_yandex);
+        searchButton = findViewById(R.id.search_button_yandex);
         imageButton.setOnClickListener(this);
+        searchManager = SearchFactory.getInstance().createSearchManager(SearchManagerType.ONLINE);
 
-        searchManager = SearchFactory.getInstance().createSearchManager(SearchManagerType.COMBINED);
         mapView.getMap().setRotateGesturesEnabled(false);
+        mapView.getMap().addCameraListener(this);
+        //mapView.getMap().addTapListener(this);
         userLocationLayer = mapKit.createUserLocationLayer(mapView.getMapWindow());
         locationManager = MapKitFactory.getInstance().createLocationManager();
         locationManager.requestSingleUpdate(locationListener);
@@ -103,7 +113,14 @@ public class YandexActivity extends AppCompatActivity implements UserLocationObj
     }
 
     private void submitQuery(String query){
-        session = searchManager.submit(query, VisibleRegionUtils.toPolygon(mapView.getMap().getVisibleRegion()), new SearchOptions(), this);
+        if(!query.isEmpty()) {
+            Log.e("MAP","submitQuery"+query);
+            session = searchManager.submit(query, VisibleRegionUtils.toPolygon(mapView.getMap().getVisibleRegion()), new SearchOptions(), this);
+        }
+        else{
+            MapObjectCollection collection = mapView.getMap().getMapObjects();
+            collection.clear();
+        }
     }
 
     @Override
@@ -124,15 +141,15 @@ public class YandexActivity extends AppCompatActivity implements UserLocationObj
     @Override
     public void onClick(View view) {
         switch (view.getId()){
+            case R.id.search_button_yandex:
+
+                break;
             case R.id.my_position_yandex:
                 try {
                     mapView.getMap().move(new CameraPosition(myPoint,18,0,0));
                 }catch (IllegalArgumentException e){
                     Log.e(" myPoint",e.getMessage());
                 }
-                break;
-            case R.id.search_button_yandex:
-                submitQuery(editText.getText().toString());
                 break;
         }
     }
@@ -154,4 +171,21 @@ public class YandexActivity extends AppCompatActivity implements UserLocationObj
     public void onSearchError(@NonNull Error error) {
 
     }
+
+    @Override
+    public void onCameraPositionChanged(@NonNull Map map, @NonNull CameraPosition cameraPosition, @NonNull CameraUpdateReason cameraUpdateReason, boolean b) {
+        if(b ){
+            Log.e("YandexCameraListener","start"+editText.getText().toString()+"end");
+            submitQuery(editText.getText().toString());
+        }
+    }
+
+//    @Override
+//    public boolean onObjectTap(@NonNull GeoObjectTapEvent geoObjectTapEvent) {
+//        GeoObjectSelectionMetadata selectionMetadata = geoObjectTapEvent.getGeoObject().getMetadataContainer().getItem(GeoObjectSelectionMetadata.class);
+//        if(selectionMetadata != null){
+//            mapView.getMap().selectGeoObject(selectionMetadata.getId(),selectionMetadata.getLayerId());
+//        }
+//        return selectionMetadata != null;
+//    }
 }
