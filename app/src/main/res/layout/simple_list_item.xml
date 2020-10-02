@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layout_marginBottom="10dp"
+    android:background="@color/cardview_light_background">
+
+    <TextView
+        android:text="Еламед"
+        android:layout_marginLeft="15dp"
+        android:textSize="20dp"
+        android:id="@+id/name_organizatin"
+        android:textColor="#000002"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/address_organizaton"
+            android:text="адрес"
+            android:textSize="15dp"
+            android:textColor="@color/cardview_dark_background"
+            android:layout_marginLeft="25dp"
+            android:layout_toLeftOf="@id/distance"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+        <TextView
+            android:id="@+id/distance"
+            android:layout_marginRight="10dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="300м"
+            android:textColor="@color/cardview_dark_background"
+            android:layout_marginLeft="30dp"/>
+    </RelativeLayout>
+
+    <View
+
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/cardview_shadow_end_color"/>
+</LinearLayout>
