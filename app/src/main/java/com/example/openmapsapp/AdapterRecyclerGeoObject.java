@@ -50,7 +50,7 @@ public class AdapterRecyclerGeoObject extends RecyclerView.Adapter<AdapterRecycl
        holder.name.setText(geoObject.getName());
        holder.address.setText(geoObject.getDescriptionText());
        if (null!=myPoint){
-           holder.distance.setText(GeoCalculating.calcDistanceKm(myPoint,point)+"km");
+           holder.distance.setText(GeoCalculating.calcDistanceKm(myPoint,point));
        }
     }
 
