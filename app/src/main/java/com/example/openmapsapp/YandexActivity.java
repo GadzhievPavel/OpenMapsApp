@@ -1,5 +1,6 @@
 package com.example.openmapsapp;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -8,6 +9,7 @@ import android.widget.ImageButton;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -20,6 +22,7 @@ import com.yandex.mapkit.MapKit;
 import com.yandex.mapkit.MapKitFactory;
 import com.yandex.mapkit.geometry.Point;
 import com.yandex.mapkit.layers.ObjectEvent;
+import com.yandex.mapkit.location.FilteringMode;
 import com.yandex.mapkit.location.Location;
 import com.yandex.mapkit.location.LocationListener;
 import com.yandex.mapkit.location.LocationManager;
@@ -37,6 +40,7 @@ import com.yandex.mapkit.search.SearchManager;
 import com.yandex.mapkit.search.SearchManagerType;
 import com.yandex.mapkit.search.SearchOptions;
 import com.yandex.mapkit.search.Session;
+import com.yandex.mapkit.search.Sort;
 import com.yandex.mapkit.user_location.UserLocationLayer;
 import com.yandex.mapkit.user_location.UserLocationObjectListener;
 import com.yandex.mapkit.user_location.UserLocationView;
@@ -45,10 +49,12 @@ import com.yandex.runtime.image.ImageProvider;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class YandexActivity extends AppCompatActivity implements CameraListener, UserLocationObjectListener, View.OnClickListener, Session.SearchListener {
 
+    private boolean FIRST_ITERATION = true;
     private final String MAPKIT_API_KEY = "c1afc545-5c1e-48f2-99af-210cd8c7c768";
     private MapView mapView;
     private FloatingActionButton imageButton;
@@ -66,7 +72,11 @@ public class YandexActivity extends AppCompatActivity implements CameraListener,
         @Override
         public void onLocationUpdated(@NonNull Location location) {
             myPoint = location.getPosition();
-            mapView.getMap().move(new CameraPosition(myPoint,18,0,0),new Animation(Animation.Type.SMOOTH,3),null);
+            if(FIRST_ITERATION){
+                mapView.getMap().move(new CameraPosition(myPoint,18,0,0),new Animation(Animation.Type.SMOOTH,3),null);
+                FIRST_ITERATION = false;
+            }
+
         }
 
         @Override
@@ -98,7 +108,7 @@ public class YandexActivity extends AppCompatActivity implements CameraListener,
         mapView.getMap().addCameraListener(this);
         userLocationLayer = mapKit.createUserLocationLayer(mapView.getMapWindow());
         locationManager = MapKitFactory.getInstance().createLocationManager();
-        locationManager.requestSingleUpdate(locationListener);
+        locationManager.subscribeForLocationUpdates(10,1000,10,true,FilteringMode.ON,locationListener);
         userLocationLayer.setVisible(true);
         userLocationLayer.setHeadingEnabled(true);
         userLocationLayer.setObjectListener(this);
@@ -152,7 +162,8 @@ public class YandexActivity extends AppCompatActivity implements CameraListener,
                 break;
             case R.id.my_position_yandex:
                 try {
-                    mapView.getMap().move(new CameraPosition(myPoint,18,0,0));
+                    locationManager.requestSingleUpdate(locationListener);
+                    mapView.getMap().move(new CameraPosition(myPoint,18,0,0),new Animation(Animation.Type.SMOOTH,3),null);
                 }catch (IllegalArgumentException e){
                     Log.e(" myPoint",e.getMessage());
                 }
@@ -160,12 +171,13 @@ public class YandexActivity extends AppCompatActivity implements CameraListener,
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public void onSearchResponse(@NonNull Response response) {
         MapObjectCollection collection = mapView.getMap().getMapObjects();
         collection.clear();
         items = response.getCollection().getChildren();
-        for (GeoObjectCollection.Item item:response.getCollection().getChildren()){
+        for (GeoObjectCollection.Item item:items){
             Log.e("Map",item.getObj().getName()+" "+ item.getObj().getDescriptionText()+" " );
             Point point = item.getObj().getGeometry().get(0).getPoint();
             if(point != null){
@@ -194,18 +206,10 @@ public class YandexActivity extends AppCompatActivity implements CameraListener,
     private AdapterRecyclerGeoObject createAdapter(){
         AdapterRecyclerGeoObject object;
         if(myPoint!=null){
-           object = new AdapterRecyclerGeoObject(this, items,myPoint);
+           object = new AdapterRecyclerGeoObject(this, items,mapView,myPoint);
         }else {
-            object = new AdapterRecyclerGeoObject(this,items);
+            object = new AdapterRecyclerGeoObject(this,items,mapView);
         }
      return object;
     }
-//    @Override
-//    public boolean onObjectTap(@NonNull GeoObjectTapEvent geoObjectTapEvent) {
-//        GeoObjectSelectionMetadata selectionMetadata = geoObjectTapEvent.getGeoObject().getMetadataContainer().getItem(GeoObjectSelectionMetadata.class);
-//        if(selectionMetadata != null){
-//            mapView.getMap().selectGeoObject(selectionMetadata.getId(),selectionMetadata.getLayerId());
-//        }
-//        return selectionMetadata != null;
-//    }
 }
