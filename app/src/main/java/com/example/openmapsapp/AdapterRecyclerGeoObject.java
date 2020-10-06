@@ -19,8 +19,10 @@ import com.yandex.mapkit.GeoObjectCollection;
 import com.yandex.mapkit.geometry.Circle;
 import com.yandex.mapkit.geometry.Point;
 import com.yandex.mapkit.map.CameraPosition;
+import com.yandex.mapkit.map.GeoObjectSelectionMetadata;
 import com.yandex.mapkit.map.Map;
 import com.yandex.mapkit.map.MapObjectCollection;
+import com.yandex.mapkit.map.PlacemarkMapObject;
 import com.yandex.mapkit.mapview.MapView;
 import com.yandex.mapkit.search.search_layer.PlacemarkIconType;
 import com.yandex.runtime.image.AnimatedImageProvider;
@@ -62,23 +64,25 @@ public class AdapterRecyclerGeoObject extends RecyclerView.Adapter<AdapterRecycl
 
     @Override
     public void onBindViewHolder(@NonNull final AdapterRecyclerGeoObject.MyViewHolder holder, int position) {
-       final GeoObject geoObject = items.get(position).getObj();
-       Point point = geoObject.getGeometry().get(0).getPoint();
-       holder.name.setText(geoObject.getName());
-       holder.address.setText(geoObject.getDescriptionText());
-       holder.linearLayout.setOnClickListener(new View.OnClickListener() {
+        final MapObjectCollection objectCollection = mapView.getMap().getMapObjects().addCollection();
+        final GeoObject geoObject = items.get(position).getObj();
+        Point point = geoObject.getGeometry().get(0).getPoint();
+        holder.name.setText(geoObject.getName());
+        holder.address.setText(geoObject.getDescriptionText());
+        holder.linearLayout.setOnClickListener(new View.OnClickListener() {
            @Override
            public void onClick(View view) {
-                Point point1 = geoObject.getGeometry().get(0).getPoint();
-                mapView.getMap().move(new CameraPosition(point1,15,0,0),new Animation(Animation.Type.SMOOTH,4),null);
-                mapView.getMap().getMapObjects().addPlacemark(point1, ImageProvider.fromResource(context,R.drawable.my_marker));
-                holder.linearLayout.setBackgroundColor(Color.argb(100,0,255,127));
-                notifyDataSetChanged();
+               Point point1 = geoObject.getGeometry().get(0).getPoint();
+               mapView.getMap().move(new CameraPosition(point1,15,0,0),new Animation(Animation.Type.SMOOTH,4),null);
+                //mapView.getMap().getMapObjects().addPlacemark(point1, ImageProvider.fromResource(context,R.drawable.my_marker));
+               holder.linearLayout.setBackgroundColor(Color.argb(100,0,255,127));
+               PlacemarkMapObject placemarkMapObject = objectCollection.addPlacemark(point1);
+               placemarkMapObject.setIcon(ImageProvider.fromResource(context,R.drawable.center));
            }
-       });
-       if (null!=myPoint){
+        });
+        if (null!=myPoint){
            holder.distance.setText(GeoCalculating.calcDistanceKm(myPoint,point));
-       }
+        }
     }
 
     @Override

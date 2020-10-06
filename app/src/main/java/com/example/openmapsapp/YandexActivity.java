@@ -32,6 +32,7 @@ import com.yandex.mapkit.map.CameraPosition;
 import com.yandex.mapkit.map.CameraUpdateReason;
 import com.yandex.mapkit.map.Map;
 import com.yandex.mapkit.map.MapObjectCollection;
+import com.yandex.mapkit.map.PlacemarkMapObject;
 import com.yandex.mapkit.map.VisibleRegionUtils;
 import com.yandex.mapkit.mapview.MapView;
 import com.yandex.mapkit.search.Response;
@@ -40,16 +41,13 @@ import com.yandex.mapkit.search.SearchManager;
 import com.yandex.mapkit.search.SearchManagerType;
 import com.yandex.mapkit.search.SearchOptions;
 import com.yandex.mapkit.search.Session;
-import com.yandex.mapkit.search.Sort;
 import com.yandex.mapkit.user_location.UserLocationLayer;
 import com.yandex.mapkit.user_location.UserLocationObjectListener;
 import com.yandex.mapkit.user_location.UserLocationView;
 import com.yandex.runtime.Error;
 import com.yandex.runtime.image.ImageProvider;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 public class YandexActivity extends AppCompatActivity implements CameraListener, UserLocationObjectListener, View.OnClickListener, Session.SearchListener {
@@ -171,6 +169,7 @@ public class YandexActivity extends AppCompatActivity implements CameraListener,
         }
     }
 
+    ArrayList<PlacemarkMapObject> collections_global = new ArrayList<>();
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public void onSearchResponse(@NonNull Response response) {
@@ -181,7 +180,8 @@ public class YandexActivity extends AppCompatActivity implements CameraListener,
             Log.e("Map",item.getObj().getName()+" "+ item.getObj().getDescriptionText()+" " );
             Point point = item.getObj().getGeometry().get(0).getPoint();
             if(point != null){
-                collection.addPlacemark(point, ImageProvider.fromResource(this,R.drawable.search_layer_advert_pin_dust_default));
+                PlacemarkMapObject object = collection.addPlacemark(point, ImageProvider.fromResource(this,R.drawable.search_layer_advert_pin_dust_default));
+                collections_global.add(object);
             }
         }
         listView.setAdapter(createAdapter());

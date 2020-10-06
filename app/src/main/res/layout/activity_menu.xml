@@ -17,5 +17,10 @@
         android:text="OpenStreetMap"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/test_map"
+        android:text="test"/>
 
 </LinearLayout>

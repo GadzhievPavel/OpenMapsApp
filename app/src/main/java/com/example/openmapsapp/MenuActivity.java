@@ -12,15 +12,17 @@ import androidx.appcompat.app.AppCompatActivity;
 public class MenuActivity extends AppCompatActivity implements View.OnClickListener {
     private Button buttonYandex;
     private Button buttonOSM;
+    private Button button;
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_menu);
         buttonOSM = findViewById(R.id.osm);
         buttonYandex = findViewById(R.id.yandex);
+        button = findViewById(R.id.test_map);
         buttonOSM.setOnClickListener(this);
         buttonYandex.setOnClickListener(this);
-
+        button.setOnClickListener(this);
     }
 
     @Override
@@ -35,6 +37,9 @@ public class MenuActivity extends AppCompatActivity implements View.OnClickListe
                 intent = new Intent(this,MainActivity.class);
                 startActivity(intent);
                 break;
+            case R.id.test_map:
+                intent = new Intent(this,TestActivity.class);
+                startActivity(intent);
         }
     }
 }
